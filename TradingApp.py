@@ -1,14 +1,16 @@
 import threading
 from ibapi.client import *
 from ibapi.wrapper import *
-import time , Utilities , configStrategy1
+import time , Utilities 
+from config_strategys import all_vars 
 import pandas as pd
 import warnings
+import backtests
 
 class TradingApp(EWrapper, EClient):
     def __init__(self):
         ######################## varibels ####################
-        self.historicalDataFrame = {}
+        self.historicalDataFrame = {} #-> should be {"ticker":dataFrame}
         self.historicalDataCounter = -1
         # self.nextValidOrderId -> been initiated in method 'nextValidId'
         self.orders_df = pd.DataFrame(columns=['PermId', 'ClientId', 'OrderId',
@@ -46,10 +48,10 @@ class TradingApp(EWrapper, EClient):
     
     def historicalData(self, reqId: int, bar: BarData):
         #arranging historical data in a data stracture 
-        if configStrategy1.contracts[reqId]["symbol"] not in self.historicalDataFrame.keys() : 
-            self.historicalDataFrame[configStrategy1.contracts[reqId]["symbol"]] = [{"date":bar.date,"open":bar.open,"high":bar.high,"low":bar.low,"close":bar.close,"volume":bar.volume}]
-        elif configStrategy1.contracts[reqId]["symbol"] in self.historicalDataFrame.keys() : 
-            self.historicalDataFrame[configStrategy1.contracts[reqId]["symbol"]].append({"date":bar.date,"open":bar.open,"high":bar.high,"low":bar.low,"close":bar.close,"volume":bar.volume})
+        if all_vars[current_strategy_name]["contracts"][reqId]["symbol"] not in self.historicalDataFrame.keys() : 
+            self.historicalDataFrame[all_vars[current_strategy_name]["contracts"][reqId]["symbol"]] = [{"date":bar.date,"open":bar.open,"high":bar.high,"low":bar.low,"close":bar.close,"volume":bar.volume}]
+        elif all_vars[current_strategy_name]["contracts"][reqId]["symbol"] in self.historicalDataFrame.keys() : 
+            self.historicalDataFrame[all_vars[current_strategy_name]["contracts"][reqId]["symbol"]].append({"date":bar.date,"open":bar.open,"high":bar.high,"low":bar.low,"close":bar.close,"volume":bar.volume})
         
         #printing the data for user 
         print (f"historical data reqID : {reqId} \n BarData : {bar}")
@@ -87,7 +89,12 @@ class TradingApp(EWrapper, EClient):
         dictionary = {"ReqId":reqId, "DailyPnL": dailyPnL, "UnrealizedPnL": unrealizedPnL, "RealizedPnL": realizedPnL}
         self.pnl_summary = self.pnl_summary._append(dictionary, ignore_index=True)
 
-########################## MY FUNCTIONS  #######################################    
+########################## MY FUNCTIONS  ####################################### 
+    def play(self,strategy_name:str,backtestMode:bool):
+
+        if backtestMode :
+            backtests.backtest_strategy1(self,all_vars[strategy_name])
+
     def reqHistData(self,contracts : list,endDate:str,duration:str,candleTimeFrame:str) -> None :
         # requesting historical market data for at list of contracts + storing the data into pandas dataframe dictionary
         #requesting the historical market data :
@@ -120,3 +127,14 @@ class TradingApp(EWrapper, EClient):
         
         self.historicalDataFrame = data_frame_dict
             
+
+############## RUN THE BOT ##################
+if __name__ == "__main__":
+    #INITAE TRADINGAPP
+    AlgoP = TradingApp()
+    time.sleep(5)
+    #choose strategy
+    current_strategy_name="strategy 1"
+    backtets_mode=True
+    #strat Algop
+    AlgoP.play(current_strategy_name,backtets_mode)

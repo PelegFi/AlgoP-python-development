@@ -1,0 +1,10 @@
+
+ def historicalData(self, reqId: int, bar: BarData):
+        #arranging historical data in a data stracture 
+        if configStrategy1.contracts[reqId]["symbol"] not in self.historicalDataFrame.keys() : 
+            self.historicalDataFrame[configStrategy1.contracts[reqId]["symbol"]] = [{"date":bar.date,"open":bar.open,"high":bar.high,"low":bar.low,"close":bar.close,"volume":bar.volume}]
+        elif configStrategy1.contracts[reqId]["symbol"] in self.historicalDataFrame.keys() : 
+            self.historicalDataFrame[configStrategy1.contracts[reqId]["symbol"]].append({"date":bar.date,"open":bar.open,"high":bar.high,"low":bar.low,"close":bar.close,"volume":bar.volume})
+        
+        #printing the data for user 
+        print (f"historical data reqID : {reqId} \n BarData : {bar}")
