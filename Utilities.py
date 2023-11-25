@@ -103,21 +103,11 @@ def calculate_compound_returns(percentage_returns:list):
 
     return (compound_sum -1 ) * 100
 
-def sharpe_ratio(returns,risk_free_rate)->float:
-        """
-        Calculates the Sharpe ratio of a portfolio.
+def sharpe_ratio_annualize(CAGR,yearly_risk_free_rate,volatility)->float:
+      return ((CAGR-yearly_risk_free_rate)/(volatility))
 
-        Args:
-            returns (np.ndarray): The returns of the portfolio.
-            risk_free_rate (float): The risk-free rate of return.
-
-        Returns:
-            float: The Sharpe ratio of the portfolio.
-        """
-
-        excess_returns = returns - risk_free_rate
-        sharpe_ratio = (np.mean(excess_returns) / np.std(excess_returns))
-        return sharpe_ratio
+def volatility(returns:np.array):
+    return returns.std()    
     
 def CAGR(compound_return:float,years:int):
     """
@@ -175,3 +165,45 @@ def hypothesisTesting(returns:np.array,alpha_level:float=0.01)->bool:
     elif p_value>alpha_level:
         return False
     
+def calculate_profit_percentage(start_price, end_price, trade_action):
+    percentage = 0.0
+    pnl = 0.0
+
+    if trade_action == "BUY":
+        if start_price < end_price:
+            pnl = end_price - start_price
+            percentage = (pnl / start_price) * 100
+        elif start_price > end_price:
+            pnl = start_price - end_price
+            percentage = -((pnl / start_price) * 100)
+
+    elif trade_action == "SELL":
+        if start_price > end_price:
+            pnl = start_price - end_price
+            percentage = (pnl / start_price) * 100
+        elif start_price < end_price:
+            pnl = end_price - start_price
+            percentage = -((pnl / start_price) * 100)
+
+    elif trade_action not in ["BUY", "SELL"]:
+        # Invalid trade action, return NaN to indicate an error.
+        percentage = float('nan')
+
+    return percentage
+
+def print_result(result: dict):
+    for ticker in result:
+        metric_dict = result[ticker]
+        print(f"--- SHOWING RESULT FOR TICKER {ticker} -----")
+        print(f"-> RETURNS : {metric_dict['returns']} || \n SUM = {sum(metric_dict["returns"])}")
+        print(f"-> trade_count : {metric_dict['trade_count']}")
+        print(f"-> compound_returns : {metric_dict['compound_returns']}")
+        print(f"-> volatility : {metric_dict['volatility']}")
+
+        # Check if 'CAGR' and 'SHARPE_ANNUAL' are in the results for the ticker
+        if "CAGR" in metric_dict:
+            print(f"-> CAGR : {metric_dict['CAGR']}")
+        if "SHARPE_ANNUAL" in metric_dict:
+            print(f"-> SHARPE_ANNUAL : {metric_dict['SHARPE_ANNUAL']}")
+        
+        print("\n")  # Add a newline for better separation between tickers

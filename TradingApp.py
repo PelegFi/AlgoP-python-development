@@ -97,6 +97,7 @@ class TradingApp(EWrapper, EClient):
 
     def reqHistData(self,contracts : list,endDate:str,duration:str,candleTimeFrame:str) -> None :
         # requesting historical market data for at list of contracts + storing the data into pandas dataframe dictionary
+        #ANY financial instumeent can be ADDED@!!! in this case i have added only "cash" + "stk"
         #requesting the historical market data :
         counter=0
         for contract in contracts :

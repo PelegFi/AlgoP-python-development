@@ -8,7 +8,7 @@ def strategy1(Zscore,emaZ)-> str:
         return ""
     
 backtest_vars={
-               "backtest_time":"2 M",
+               "backtest_time":"1 Y",
                "end_date":""}
 
 contracts = [{"symbol":"TQQQ","secType":"STK","currency":"USD","exchange":"SMART"},
