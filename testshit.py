@@ -1,10 +1,22 @@
-from indicators import Indicators
-import Utilities
-# print(Utilities.returns_percentage_to_decimal([10,29,-15,101,-99,6000,0,100,-1]))
-precentage_returns=[0,0,0,-4]
-returns_percentage_to_decimal=Utilities.returns_percentage_to_decimal(precentage_returns)
-print(returns_percentage_to_decimal)
-calculate_compound_returns=Utilities.calculate_compound_returns(precentage_returns)
-print(calculate_compound_returns)
-print(len(precentage_returns))
-print(Utilities.CAGR(calculate_compound_returns,len(precentage_returns)))   
+import pandas as pd
+
+# Corrected data dictionary
+data = {
+    "col1": [1, "a"],
+    "col2": [2, "b"],
+    "col3": [3, "c"],
+    "col4": [4, "d"]
+}
+
+# Create DataFrame with 'row1' and 'row2' as index labels
+dataFrame = pd.DataFrame(data, index=["row1", "row2"])
+print(dataFrame)
+# Append a new row to the DataFrame
+# This row must have the same columns as the existing DataFrame
+dataFrame = dataFrame._append(pd.DataFrame({"col1": ["added_value"], 
+                                           "col2": ["added_value"],
+                                           "col3": ["added_value"],
+                                           "col4": ["added_value"]}, 
+                                          index=["added row"]))
+
+print(dataFrame)

@@ -110,7 +110,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                         result[ticker]["SHARPE_ANNUAL"] = Utilities.sharpe_ratio_annualize(result[ticker]["CAGR"],2.5,result[ticker]["volatility"])
                 print("\n")
         
-        Utilities.print_result(result)
+        Utilities.print_backtest_result(result)
                         
 
 

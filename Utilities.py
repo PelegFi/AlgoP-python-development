@@ -191,7 +191,7 @@ def calculate_profit_percentage(start_price, end_price, trade_action):
 
     return percentage
 
-def print_result(result: dict):
+def print_backtest_result(result: dict):
     for ticker in result:
         metric_dict = result[ticker]
         print(f"--- SHOWING RESULT FOR TICKER {ticker} -----")

@@ -5,22 +5,23 @@ import time , Utilities
 from config_strategys import all_vars 
 import pandas as pd
 import warnings
-import backtests
+import backtests , placeOrderStrategy
 
 class TradingApp(EWrapper, EClient):
     def __init__(self):
         ######################## varibels ####################
         self.historicalDataFrame = {} #-> should be {"ticker":dataFrame}
         self.historicalDataCounter = -1
+        self.is_position_arrived=False
+        self.is_account_summary_arrived = False
         # self.nextValidOrderId -> been initiated in method 'nextValidId'
         self.orders_df = pd.DataFrame(columns=['PermId', 'ClientId', 'OrderId',
                                               'Account', 'Symbol', 'SecType',
                                               'Exchange', 'Action', 'OrderType',
                                               'TotalQty', 'CashQty', 'LmtPrice',
                                               'AuxPrice', 'Status'])
-        self.positions_df = pd.DataFrame(columns=['Account', 'Symbol', 'SecType',
-                                            'Currency', 'Position', 'Avg cost'])
-        self.account_summary = pd.DataFrame(columns=['ReqId', 'Account', 'Tag', 'Value', 'Currency'])
+        self.current_positions ={}#-> {"symbol" : {account : ,sectype: ,currency: position_size: ,avg_cost: }}
+        self.account_summary = {}#-> {account : dataframe}
         self.pnl_summary = pd.DataFrame(columns=['ReqId', 'DailyPnL', 'UnrealizedPnL', 'RealizedPnL'])
         ######################## connecting to TWS ####################
         EClient.__init__(self, wrapper=self)
@@ -75,26 +76,46 @@ class TradingApp(EWrapper, EClient):
     
     def position(self, account, contract, position, avgCost):
         super().position(account, contract, position, avgCost)
-        dictionary = {"Account":account, "Symbol": contract.symbol, "SecType": contract.secType,
-                      "Currency": contract.currency, "Position": position, "Avg cost": avgCost}
-        self.positions_df = self.positions_df._append(dictionary, ignore_index=True)
+
+        if account not in self.current_positions:
+            self.current_positions[account] = pd.DataFrame(columns=["contract","position","avg_cost"]).set_index("contract")
+        
+        self.current_positions[account] = self.current_positions[account]._append(pd.DataFrame({"position":position,"avg_cost":avgCost},index=[contract.symbol]))
+        # Set the flag to indicate the new position data has arrived
+        self.is_position_arrived = True
     
     def accountSummary(self, reqId, account, tag, value, currency):
         super().accountSummary(reqId, account, tag, value, currency)
-        dictionary = {"ReqId":reqId, "Account": account, "Tag": tag, "Value": value, "Currency": currency}
-        self.account_summary = self.account_summary._append(dictionary, ignore_index=True)
+
+        if account not in self.account_summary:
+            self.account_summary[account] = pd.DataFrame(columns=["Tag","Value"]).set_index("Tag")
+        
+        self.account_summary[account]=self.account_summary[account]._append(pd.DataFrame({"Value":value},index=[tag]))
+        self.is_account_summary_arrived=True
         
     def pnl(self, reqId, dailyPnL, unrealizedPnL, realizedPnL):
         super().pnl(reqId, dailyPnL, unrealizedPnL, realizedPnL)
         dictionary = {"ReqId":reqId, "DailyPnL": dailyPnL, "UnrealizedPnL": unrealizedPnL, "RealizedPnL": realizedPnL}
         self.pnl_summary = self.pnl_summary._append(dictionary, ignore_index=True)
 
+    def tickPrice(self, tickerId, field, price, attrib):
+        print(f"Ticker Id: {tickerId}, Field: {field}, Price: {price}")
+
 ########################## MY FUNCTIONS  ####################################### 
     def play(self,strategy_name:str,backtestMode:bool):
+        self.reqPositions()
+        self.reqAccountSummary(9002, "All", "$LEDGER")
+
+        while self.is_position_arrived == False or self.is_account_summary_arrived== False :
+            time.sleep(1)
 
         if backtestMode :
-            backtests.backtest_strategy1(self,all_vars[strategy_name])
-
+            if strategy_name == "strategy 1":
+                backtests.backtest_strategy1(self,all_vars[strategy_name])
+        else:
+            if strategy_name == "strategy 1":
+                placeOrderStrategy.strategy_1(self,all_vars[strategy_name],self.current_positions,self.account_summary)
+               
     def reqHistData(self,contracts : list,endDate:str,duration:str,candleTimeFrame:str) -> None :
         # requesting historical market data for at list of contracts + storing the data into pandas dataframe dictionary
         #ANY financial instumeent can be ADDED@!!! in this case i have added only "cash" + "stk"
@@ -118,7 +139,7 @@ class TradingApp(EWrapper, EClient):
         #creating data frame dictionary with pandas : 
         #taking all the data stored in the trading app object 'self.data' and turn it into a pandas dataframe for later use 
         self.turn_historicalDataFrame_toPandas()
-
+        
     def turn_historicalDataFrame_toPandas(self):
         tickers=self.historicalDataFrame.keys()
         data_frame_dict={}
@@ -136,6 +157,7 @@ if __name__ == "__main__":
     time.sleep(5)
     #choose strategy
     current_strategy_name="strategy 1"
-    backtets_mode=True
+    backtets_mode=False
     #strat Algop
     AlgoP.play(current_strategy_name,backtets_mode)
+ 
