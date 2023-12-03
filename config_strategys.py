@@ -6,9 +6,10 @@ def strategy1(Zscore,emaZ)-> str:
         return "SELL"
     else:
         return ""
-    
+accounts_list=['DU4331503']
+
 backtest_vars={
-               "backtest_time":"1 Y",
+               "backtest_time":"3 M",
                "end_date":""}
 
 contracts = [{"symbol":"TQQQ","secType":"STK","currency":"USD","exchange":"SMART"},
@@ -22,7 +23,7 @@ strategy_vars={"ZscoreWindow":75,
                "emaZwindow":75,
                "candlesTimeFrame":"15 mins"}
 
-other_vars={"excel_file_path" : "C:\\Users\\Administrator\\Desktop\\output.xlsx"}
+other_vars={"excle_path_backtest":"C:\\Users\\Administrator\\Desktop\\AlgoP-python\\excels\\backtets"}
 
 #############################strategy 2 variables ###################################
 
@@ -34,4 +35,5 @@ all_vars={"strategy 1":
            "contracts":contracts,
            "risk_vars":risk_vars,
            "strategy_vars":strategy_vars,
-           "other_variables":other_vars}}
+           "other_variables":other_vars,
+           "accounts_list":accounts_list}}

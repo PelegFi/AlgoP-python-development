@@ -1,11 +1,12 @@
 import threading
 from ibapi.client import *
 from ibapi.wrapper import *
-import time , Utilities 
+import time 
 from config_strategys import all_vars 
 import pandas as pd
 import warnings
 import backtests , placeOrderStrategy
+from utilities import Utilities
 
 class TradingApp(EWrapper, EClient):
     def __init__(self):
@@ -14,14 +15,16 @@ class TradingApp(EWrapper, EClient):
         self.historicalDataCounter = -1
         self.is_position_arrived=False
         self.is_account_summary_arrived = False
+        self.current_strategy_name = ""
         # self.nextValidOrderId -> been initiated in method 'nextValidId'
         self.orders_df = pd.DataFrame(columns=['PermId', 'ClientId', 'OrderId',
                                               'Account', 'Symbol', 'SecType',
                                               'Exchange', 'Action', 'OrderType',
                                               'TotalQty', 'CashQty', 'LmtPrice',
                                               'AuxPrice', 'Status'])
-        self.current_positions ={}#-> {"symbol" : {account : ,sectype: ,currency: position_size: ,avg_cost: }}
+        self.current_positions ={}#-> {account : dataframe->{"contract","position","amount","start_price"}}
         self.account_summary = {}#-> {account : dataframe}
+        self.tick_price_dict = {}#-> {"symbol" : tickprice}
         self.pnl_summary = pd.DataFrame(columns=['ReqId', 'DailyPnL', 'UnrealizedPnL', 'RealizedPnL'])
         ######################## connecting to TWS ####################
         EClient.__init__(self, wrapper=self)
@@ -78,9 +81,11 @@ class TradingApp(EWrapper, EClient):
         super().position(account, contract, position, avgCost)
 
         if account not in self.current_positions:
-            self.current_positions[account] = pd.DataFrame(columns=["contract","position","avg_cost"]).set_index("contract")
-        
-        self.current_positions[account] = self.current_positions[account]._append(pd.DataFrame({"position":position,"avg_cost":avgCost},index=[contract.symbol]))
+            self.current_positions[account] = pd.DataFrame(columns=["contract","position","amount","start_price"]).set_index("contract")
+        if position >0:
+            self.current_positions[account] = self.current_positions[account]._append(pd.DataFrame({"position":"BUY","amount":position,"start_price":avgCost},index=[contract.symbol]))
+        elif position <0 :
+            self.current_positions[account] = self.current_positions[account]._append(pd.DataFrame({"position":"SELL","amount":position,"start_price":avgCost},index=[contract.symbol]))
         # Set the flag to indicate the new position data has arrived
         self.is_position_arrived = True
     
@@ -99,23 +104,27 @@ class TradingApp(EWrapper, EClient):
         self.pnl_summary = self.pnl_summary._append(dictionary, ignore_index=True)
 
     def tickPrice(self, tickerId, field, price, attrib):
-        print(f"Ticker Id: {tickerId}, Field: {field}, Price: {price}")
+        if field == 4 :
+            self.tick_price_dict[all_vars[self.current_strategy_name]["contracts"][tickerId]["symbol"]] = price
 
+    def positionEnd(self):
+        self.is_position_arrived = True
 ########################## MY FUNCTIONS  ####################################### 
     def play(self,strategy_name:str,backtestMode:bool):
+        self.current_strategy_name = strategy_name
         self.reqPositions()
         self.reqAccountSummary(9002, "All", "$LEDGER")
-
+       
         while self.is_position_arrived == False or self.is_account_summary_arrived== False :
             time.sleep(1)
-
+        
         if backtestMode :
             if strategy_name == "strategy 1":
                 backtests.backtest_strategy1(self,all_vars[strategy_name])
         else:
             if strategy_name == "strategy 1":
-                placeOrderStrategy.strategy_1(self,all_vars[strategy_name],self.current_positions,self.account_summary)
-               
+                placeOrderStrategy.strategy_1(self,all_vars[strategy_name],self.current_positions if len(self.current_positions) != 0 else None ,self.account_summary)
+   
     def reqHistData(self,contracts : list,endDate:str,duration:str,candleTimeFrame:str) -> None :
         # requesting historical market data for at list of contracts + storing the data into pandas dataframe dictionary
         #ANY financial instumeent can be ADDED@!!! in this case i have added only "cash" + "stk"
@@ -157,7 +166,7 @@ if __name__ == "__main__":
     time.sleep(5)
     #choose strategy
     current_strategy_name="strategy 1"
-    backtets_mode=False
+    backtets_mode=True
     #strat Algop
     AlgoP.play(current_strategy_name,backtets_mode)
  

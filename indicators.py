@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import Utilities
+import utilities
 
 ################################# ALL INDICATORS #########################
 
@@ -115,7 +115,7 @@ def calculate_fibonacci_levels(high, low):
     return fibonacci_levels
 
 
-    decimal_returns=Utilities.returns_precentage_to_decimal(precentage_returns)
-    compundPnL=Utilities.calculate_compound_returns(decimal_returns)
+    decimal_returns=utilities.returns_precentage_to_decimal(precentage_returns)
+    compundPnL=utilities.calculate_compound_returns(decimal_returns)
     annualize_return= compundPnL**1/years - 1
     return annualize_return

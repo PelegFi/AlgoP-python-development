@@ -3,11 +3,12 @@ import pandas as pd
 import numpy as np
 import indicators
 from copy import deepcopy
-import Utilities
+from utilities import Utilities
+import openpyxl
+from excels import Excels
 
 def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
         #setting up variabels
-        print(strategy_vars)
         contracts = strategy_vars["contracts"]
         backtest_vars = strategy_vars["backtest_vars"]
         risk_vars = strategy_vars["risk_vars"]
@@ -15,7 +16,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
         other_vars = strategy_vars["other_variables"]
         strategy_func = strategy_vars["strategy_function"]
         result={} # resaul dictionary
-
+        excel = Excels(other_vars["excle_path_backtest"])
         #requesting historical data for contracts
         tradingApp.reqHistData(contracts,backtest_vars["end_date"],backtest_vars["backtest_time"],strategy_parameters["candlesTimeFrame"])
         dataFramesDict=deepcopy(tradingApp.historicalDataFrame)
@@ -39,6 +40,9 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                 current_start_price = None
                 current_end_price = None
                 current_dataFrame=dataFramesDict[ticker]
+                #create a new excel sheet 
+                excel.wb.create_sheet(ticker)
+                excel.current_ws = excel.wb[ticker]
 
                 for i in range(1,len(current_dataFrame)):
                         #setting up variables for comfort writing
@@ -54,11 +58,13 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                                         current_tradeCount+=1
                                         current_start_price=current_price
                                         print(f"OPEN TRADE : {current_position} || PRICE : {current_price} || DATE : {current_date} || STRATEGY SIGNAL : {current_signal} || Zscore : {current_Zscore} || emaZ : {current_emaZ}")
+                                        excel.write_line_backtest_strategy1(current_date,current_price,"BUY",current_signal,current_Zscore,current_emaZ,sum(current_return),Utilities.calculate_compound_returns(current_return))
                                 elif current_signal == "SELL" :
                                         current_position="SELL"
                                         current_tradeCount+=1
                                         current_start_price=current_price
                                         print(f"OPEN TRADE : {current_position} || PRICE : {current_price} || DATE : {current_date} || STRATEGY SIGNAL : {current_signal} || Zscore : {current_Zscore} || emaZ : {current_emaZ}")
+                                        excel.write_line_backtest_strategy1(current_date,current_price,"SELL",current_signal,current_Zscore,current_emaZ,sum(current_return),Utilities.calculate_compound_returns(current_return))
                         else :
                                 if current_position == "BUY":
                                         if current_signal == "SELL":
@@ -72,6 +78,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                                                 current_tradeCount+=1
                                                 current_start_price = current_price
                                                 print(f"OPEN TRADE : {current_position} || PRICE : {current_price} || DATE : {current_date} || STRATEGY SIGNAL : {current_signal} || Zscore : {current_Zscore} || emaZ : {current_emaZ}")
+                                                excel.write_line_backtest_strategy1(current_date,current_price,"SELL",current_signal,current_Zscore,current_emaZ,sum(current_return),Utilities.calculate_compound_returns(current_return))
                                         elif current_signal == "":
                                                 #close BUY position + calculate buy trade profit
                                                 current_end_price = current_price
@@ -79,6 +86,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                                                 current_tradeCount += 1
                                                 current_position = ""
                                                 print(f"CLOSE TRADE || PRICE : {current_price} || DATE : {current_date} || STRATEGY SIGNAL : {current_signal} || Zscore : {current_Zscore} || emaZ : {current_emaZ}")
+                                                excel.write_line_backtest_strategy1(current_date,current_price,"SELL",current_signal,current_Zscore,current_emaZ,sum(current_return),Utilities.calculate_compound_returns(current_return))
                                 elif current_position == "SELL":
                                         if current_signal == "BUY":
                                                 #calculate sell trade profit
@@ -91,6 +99,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                                                 current_tradeCount+=1
                                                 current_start_price = current_price
                                                 print(f"OPEN TRADE : {current_position} || PRICE : {current_price} || DATE : {current_date} || STRATEGY SIGNAL : {current_signal} || Zscore : {current_Zscore} || emaZ : {current_emaZ}")
+                                                excel.write_line_backtest_strategy1(current_date,current_price,"BUY",current_signal,current_Zscore,current_emaZ,sum(current_return),Utilities.calculate_compound_returns(current_return))
                                         elif current_signal == "":
                                                 #close SELL position + calculate buy trade profit
                                                 current_end_price = current_price
@@ -98,6 +107,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                                                 current_tradeCount += 1
                                                 current_position = ""
                                                 print(f"CLOSE TRADE || PRICE : {current_price} || DATE : {current_date} || STRATEGY SIGNAL : {current_signal} || Zscore : {current_Zscore} || emaZ : {current_emaZ}")
+                                                excel.write_line_backtest_strategy1(current_date,current_price,"BUY",current_signal,current_Zscore,current_emaZ,sum(current_return),Utilities.calculate_compound_returns(current_return))
 
                 #SAVING THE RSULTS INTO DICT
                 result[ticker]["returns"] = current_return
