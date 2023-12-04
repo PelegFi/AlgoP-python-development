@@ -11,7 +11,7 @@ class Utilities ():
     def place_order(tradingApp:TradingApp , contract:Contract , order : Order):
         tradingApp.reqIds(-1)
         time.sleep(1)
-        orderId = tradingApp.nextValidOrderId()
+        orderId = tradingApp.nextValidOrderId
         tradingApp.placeOrder(orderId,contract,order)
 
     def market_order(action, quantity):

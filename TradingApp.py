@@ -22,7 +22,7 @@ class TradingApp(EWrapper, EClient):
                                               'Exchange', 'Action', 'OrderType',
                                               'TotalQty', 'CashQty', 'LmtPrice',
                                               'AuxPrice', 'Status'])
-        self.current_positions ={}#-> {account : dataframe->{"contract","position","amount","start_price"}}
+        self.positions_data ={}#-> {account : dataframe->{"contract","position","amount","start_price"}}
         self.account_summary = {}#-> {account : dataframe}
         self.tick_price_dict = {}#-> {"symbol" : tickprice}
         self.pnl_summary = pd.DataFrame(columns=['ReqId', 'DailyPnL', 'UnrealizedPnL', 'RealizedPnL'])
@@ -80,12 +80,12 @@ class TradingApp(EWrapper, EClient):
     def position(self, account, contract, position, avgCost):
         super().position(account, contract, position, avgCost)
 
-        if account not in self.current_positions:
-            self.current_positions[account] = pd.DataFrame(columns=["contract","position","amount","start_price"]).set_index("contract")
+        if account not in self.positions_data:
+            self.positions_data[account] = pd.DataFrame(columns=["contract","position","amount","start_price","real_returns_precentages"]).set_index("contract")
         if position >0:
-            self.current_positions[account] = self.current_positions[account]._append(pd.DataFrame({"position":"BUY","amount":position,"start_price":avgCost},index=[contract.symbol]))
+            self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"BUY","amount":position,"start_price":avgCost,"real_returns_precentages":[0]},index=[contract.symbol]))
         elif position <0 :
-            self.current_positions[account] = self.current_positions[account]._append(pd.DataFrame({"position":"SELL","amount":position,"start_price":avgCost},index=[contract.symbol]))
+            self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"SELL","amount":position,"start_price":avgCost,"real_returns_precentages":[0]},index=[contract.symbol]))
         # Set the flag to indicate the new position data has arrived
         self.is_position_arrived = True
     
@@ -123,7 +123,7 @@ class TradingApp(EWrapper, EClient):
                 backtests.backtest_strategy1(self,all_vars[strategy_name])
         else:
             if strategy_name == "strategy 1":
-                placeOrderStrategy.strategy_1(self,all_vars[strategy_name],self.current_positions if len(self.current_positions) != 0 else None ,self.account_summary)
+                placeOrderStrategy.strategy_1(self,all_vars[strategy_name],self.positions_data if len(self.positions_data) != 0 else None ,self.account_summary)
    
     def reqHistData(self,contracts : list,endDate:str,duration:str,candleTimeFrame:str) -> None :
         # requesting historical market data for at list of contracts + storing the data into pandas dataframe dictionary
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     time.sleep(5)
     #choose strategy
     current_strategy_name="strategy 1"
-    backtets_mode=True
+    backtets_mode=False
     #strat Algop
     AlgoP.play(current_strategy_name,backtets_mode)
  

@@ -23,7 +23,7 @@ strategy_vars={"ZscoreWindow":75,
                "emaZwindow":75,
                "candlesTimeFrame":"15 mins"}
 
-other_vars={"excle_path_backtest":"C:\\Users\\Administrator\\Desktop\\AlgoP-python\\excels\\backtets"}
+other_vars={"excle_path_backtest":"C:\\Users\\Administrator\\Desktop\\AlgoP-python\\excels\\backtets","live_excel_path" : "C:\\Users\\Administrator\\Desktop\\AlgoP-python\\excels\\live"}
 
 #############################strategy 2 variables ###################################
 
