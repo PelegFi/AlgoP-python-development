@@ -6,7 +6,7 @@ from config_strategys import all_vars
 import pandas as pd
 import warnings
 import backtests , placeOrderStrategy
-from utilities import Utilities
+from Utilities import Utilities
 
 class TradingApp(EWrapper, EClient):
     def __init__(self):
@@ -83,9 +83,9 @@ class TradingApp(EWrapper, EClient):
         if account not in self.positions_data:
             self.positions_data[account] = pd.DataFrame(columns=["contract","position","amount","start_price","real_returns_precentages"]).set_index("contract")
         if position >0:
-            self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"BUY","amount":position,"start_price":avgCost,"real_returns_precentages":[0]},index=[contract.symbol]))
+            self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"BUY","amount":position,"start_price":avgCost},index=[contract.symbol]))
         elif position <0 :
-            self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"SELL","amount":position,"start_price":avgCost,"real_returns_precentages":[0]},index=[contract.symbol]))
+            self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"SELL","amount":position,"start_price":avgCost},index=[contract.symbol]))
         # Set the flag to indicate the new position data has arrived
         self.is_position_arrived = True
     
@@ -117,7 +117,8 @@ class TradingApp(EWrapper, EClient):
        
         while self.is_position_arrived == False or self.is_account_summary_arrived== False :
             time.sleep(1)
-        
+        self.cancelPositions() # if not -> every new position is still ariving 
+
         if backtestMode :
             if strategy_name == "strategy 1":
                 backtests.backtest_strategy1(self,all_vars[strategy_name])

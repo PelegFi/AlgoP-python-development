@@ -9,7 +9,7 @@ def strategy1(Zscore,emaZ)-> str:
 accounts_list=['DU4331503']
 
 backtest_vars={
-               "backtest_time":"3 M",
+               "backtest_time":"1 Y",
                "end_date":""}
 
 contracts = [{"symbol":"TQQQ","secType":"STK","currency":"USD","exchange":"SMART"},
@@ -23,7 +23,7 @@ strategy_vars={"ZscoreWindow":75,
                "emaZwindow":75,
                "candlesTimeFrame":"15 mins"}
 
-other_vars={"excle_path_backtest":"C:\\Users\\Administrator\\Desktop\\AlgoP-python\\excels\\backtets","live_excel_path" : "C:\\Users\\Administrator\\Desktop\\AlgoP-python\\excels\\live"}
+other_vars={"excle_path_backtest":"/Users/pelegfishman/prog_temp/AlgoP-python/excels/backtets/","live_excel_path" : "/Users/pelegfishman/prog_temp/AlgoP-python/excels/live/"}
 
 #############################strategy 2 variables ###################################
 

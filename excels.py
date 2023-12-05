@@ -10,7 +10,7 @@ class Excels():
         self.wb =openpyxl.Workbook()
         self.current_ws = self.wb.active
 
-    def create_backtest_strategy1_excel(self):
+    def create_strategy1_excel(self):
         #setting up initial data table cells
         self.current_ws["A1"] = "Date"
         self.current_ws["B1"] = "Price"

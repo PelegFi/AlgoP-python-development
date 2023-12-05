@@ -5,7 +5,7 @@ import indicators
 from copy import deepcopy
 import openpyxl
 from excels import Excels
-from utilities import Utilities
+from Utilities import Utilities
 
 def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
         #setting up variabels
@@ -43,7 +43,7 @@ def backtest_strategy1(tradingApp:TradingApp,strategy_vars:dict):
                 #create a new excel sheet 
                 excel.wb.create_sheet(ticker)
                 excel.current_ws = excel.wb[ticker]
-                excel.create_backtest_strategy1_excel()
+                excel.create_strategy1_excel()
 
                 for i in range(1,len(current_dataFrame)):
                         #setting up variables for comfort writing

@@ -5,6 +5,7 @@ import math
 import time
 import scipy.stats
 import TradingApp
+import datetime
 
 class Utilities ():
     ############################## ORDERS  ######################################
@@ -245,3 +246,8 @@ class Utilities ():
 
         print("error in function time_in_loop")
         return False
+
+    def fromat_dateTime(time) -> str:
+        dt_object = datetime.datetime.fromtimestamp(time)
+        formatted_time = dt_object.strftime("%Y%m%d %H:%M:%S")
+        return formatted_time
