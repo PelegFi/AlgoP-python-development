@@ -101,14 +101,12 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
                   if current_signal == "SELL":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("SELL",quantity+positions_data_symbol["amount"]))
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
-                     print("real_returns_precentages !!!!!!!!!!!! ",returns[current_symbol])
                      positions_data_symbol.update({"position" : "SELL" , "amount" : -quantity , "start_price" : current_price})
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity+positions_data_symbol["amount"]}")
                      excel.write_line_backtest_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                   elif current_signal == "":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("SELL",positions_data_symbol["amount"]))
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
-                     print("real_returns_precentages !!!!!!!!!!!! ",returns[current_symbol])
                      positions_data_symbol.update({"position" : "" , "amount" : 0 , "start_price" : None })
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {positions_data_symbol["amount"]}")
                      excel.write_line_backtest_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
@@ -117,14 +115,12 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",quantity+abs(positions_data_symbol["amount"])))
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity+positions_data_symbol["amount"]}")
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
-                     print("real_returns_precentages !!!!!!!!!!!! ",returns[current_symbol])
                      positions_data_symbol.update({"position" : "BUY" , "amount" : quantity , "start_price" : current_price})
                      excel.write_line_backtest_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                   elif current_signal == "":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",abs(positions_data_symbol["amount"])))
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {positions_data_symbol["amount"]}")
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
-                     print("real_returns_precentages !!!!!!!!!!!! ",returns[current_symbol])
                      positions_data_symbol.update({"position" : "" , "amount" : 0 , "start_price" : None})
                      excel.write_line_backtest_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
             
