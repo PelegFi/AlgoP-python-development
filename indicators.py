@@ -100,7 +100,7 @@ def ADX(dataFrame: pd.DataFrame, window: int):
 def Zscore(dataFrame:pd.DataFrame,ZscoreWindow,MAwindow) :
     df=dataFrame.copy()
     df["Zscore"]=(df["close"]-df["close"].rolling(ZscoreWindow).mean())/df["close"].rolling(ZscoreWindow).std(ddof=0)
-    df["emaZ"]=df["Zscore"].ewm(span=MAwindow,min_periods=MAwindow).mean()
+    df["smaZ"]=df["Zscore"].rolling(MAwindow).mean()
 
     return df
 

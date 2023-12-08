@@ -24,7 +24,7 @@ strategy_vars={"ZscoreWindow":75,
                "candlesTimeFrame":"15 mins"}
 
 other_vars={"excle_path_backtest":"/Users/pelegfishman/prog_temp/AlgoP-python/excels/backtets/",
-            "live_excel_path" : "/Users/pelegfishman/prog_temp/AlgoP-python/excels/live/current_live_excel.xlsx",
+            "live_excel_path" : "C:\\Users\\Administrator\\Desktop\\AlgoP-python\\AlgoP-python\\excels\\live",
             "load_from_existing_excel":False}
 
 #############################strategy 2 variables ###################################
