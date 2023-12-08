@@ -16,26 +16,29 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
    strategy_func = strategy_vars["strategy_function"]
    account_name=strategy_vars["accounts_list"][0]
    positions_data= openPositions[account_name].to_dict(orient='index') if openPositions is not None else {} #-> dict {ticker :{position : "BUY/SELL/""" ,amount : int ,start_price : float}}
-   excel = Excels(other_vars["live_excel_path"])
+   excel = Excels(other_vars["live_excel_path"],other_vars["load_from_existing_excel"])
    returns = {} #-> {ticker : []}
 
    #requesting historical data for first calc + get socket connections
    tradingApp.reqHistData(contracts,"",Utilities.calc_backtest_min_time(),strategy_parameters["candlesTimeFrame"])
    data_df_dict=copy.deepcopy(tradingApp.historicalDataFrame)#-> {ticker : dataframe }
 
-   #preperations for strategy loop 
+   #preperations for strategy loop -> initiating shit  
    for contract in contracts:
       #requesting market data socket connection
       tradingApp.reqMktData(contracts.index(contract),Utilities.createContract(contract["symbol"],contract["secType"],contract["currency"],contract["exchange"]),"",False,False,[])
       #initiate current position dict 
       if contract["symbol"] not in positions_data :
          positions_data[contract["symbol"]] = {"position":"","amount":0,"start_price":None}
-      #creating new excek sheet 
-      excel.wb.create_sheet(contract["symbol"])
-      excel.current_ws = excel.wb[contract["symbol"]]
-      excel.create_strategy1_excel()
-      #intiating returns
-      returns[contract["symbol"]] = []
+      # Initialize returns
+      if other_vars["load_from_existing_excel"] == False:
+         returns[contract["symbol"]] = []
+      else:
+         # Load the last cell value in column 'H' (8th column)
+         last_cell_value = excel.wb[str(contract["symbol"])].cell(row=excel.wb[str(contract["symbol"])].max_row , column=8).value
+         returns[contract["symbol"]] = [last_cell_value] if last_cell_value != 0 else []
+   
+   print("jhzdgfjsdgfvyusdhbfh -> ",returns)
 
    time.sleep(10)
    counter_delete = 1
@@ -90,12 +93,12 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
                   Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",quantity))
                   positions_data_symbol.update({"position" : "BUY" , "amount" : quantity , "start_price" : current_price})
                   print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity}")
-                  excel.write_line_backtest_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                  excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                elif current_signal == "SELL":
                   Utilities.place_order(tradingApp,current_contract,Utilities.market_order("SELL",quantity))
                   positions_data_symbol.update({"position" : "SELL" , "amount" : quantity , "start_price" : current_price})
                   print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity}")
-                  excel.write_line_backtest_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                  excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
             else :
                if positions_data_symbol["position"] == "BUY":
                   if current_signal == "SELL":
@@ -103,26 +106,26 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "SELL" , "amount" : -quantity , "start_price" : current_price})
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity+positions_data_symbol["amount"]}")
-                     excel.write_line_backtest_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                   elif current_signal == "":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("SELL",positions_data_symbol["amount"]))
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "" , "amount" : 0 , "start_price" : None })
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {positions_data_symbol["amount"]}")
-                     excel.write_line_backtest_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                elif positions_data_symbol["position"] == "SELL":
                   if current_signal == "BUY":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",quantity+abs(positions_data_symbol["amount"])))
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity+positions_data_symbol["amount"]}")
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "BUY" , "amount" : quantity , "start_price" : current_price})
-                     excel.write_line_backtest_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                   elif current_signal == "":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",abs(positions_data_symbol["amount"])))
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {positions_data_symbol["amount"]}")
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "" , "amount" : 0 , "start_price" : None})
-                     excel.write_line_backtest_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
             
             #print current p&l
             if positions_data_symbol["position"] != "":
