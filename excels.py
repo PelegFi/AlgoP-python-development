@@ -3,7 +3,7 @@ import time , datetime
 from config_strategys import all_vars
 
 class Excels():
-    def __init__(self,path,from_existing_excel:bool) -> None:
+    def __init__(self,path,from_existing_excel:bool,contracts_dict_from_allVars={}) -> None:
         if from_existing_excel == True :
             self.wb=openpyxl.load_workbook(path)
             self.wb_path=path
@@ -12,6 +12,7 @@ class Excels():
             current_dateTime = datetime.datetime.now()
             self.wb_path=path+"\\"+str(current_dateTime.strftime('%Y.%m.%d_%H-%M-%S'))+".xlsx"
             self.wb =openpyxl.Workbook()
+            self.create_strategy1_excel(contracts_dict_from_allVars)
         
         self.current_ws = self.wb.active
 
