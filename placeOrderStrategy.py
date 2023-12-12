@@ -38,7 +38,7 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
          last_cell_value = excel.wb[str(contract["symbol"])].cell(row=excel.wb[str(contract["symbol"])].max_row , column=8).value
          returns[contract["symbol"]] = [last_cell_value] if last_cell_value != 0 else []
    
-   print("jhzdgfjsdgfvyusdhbfh -> ",returns)
+   print("jhzdgfjsdgfvyusdhbfh!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> ",returns)
 
    time.sleep(10)
    counter_delete = 1
@@ -79,8 +79,8 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
 
             #add the last price and preform real time calc
             data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1], "close"] = current_price
-            data_df_dict[current_symbol] = indicators.Zscore(data_df_dict[current_symbol],strategy_parameters["ZscoreWindow"],strategy_parameters["emaZwindow"])
-            current_signal=strategy_func(data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"])
+            data_df_dict[current_symbol] = indicators.Zscore(data_df_dict[current_symbol],strategy_parameters["ZscoreWindow"],strategy_parameters["smaZwindow"])
+            current_signal=strategy_func(data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"])
             
             #delete after debugging
             print(f"for loop number {counter_delete} , ticker {current_symbol} || CAPITAL = {capital} || quantity : {quantity} || dataframe : {data_df_dict[current_symbol]}")
@@ -93,12 +93,12 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
                   Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",quantity))
                   positions_data_symbol.update({"position" : "BUY" , "amount" : quantity , "start_price" : current_price})
                   print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity}")
-                  excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                  excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                elif current_signal == "SELL":
                   Utilities.place_order(tradingApp,current_contract,Utilities.market_order("SELL",quantity))
                   positions_data_symbol.update({"position" : "SELL" , "amount" : quantity , "start_price" : current_price})
                   print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity}")
-                  excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                  excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
             else :
                if positions_data_symbol["position"] == "BUY":
                   if current_signal == "SELL":
@@ -106,30 +106,32 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "SELL" , "amount" : -quantity , "start_price" : current_price})
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity+positions_data_symbol["amount"]}")
-                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                   elif current_signal == "":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("SELL",positions_data_symbol["amount"]))
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "" , "amount" : 0 , "start_price" : None })
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : SELL || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {positions_data_symbol["amount"]}")
-                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"SELL",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                elif positions_data_symbol["position"] == "SELL":
                   if current_signal == "BUY":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",quantity+abs(positions_data_symbol["amount"])))
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {quantity+positions_data_symbol["amount"]}")
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "BUY" , "amount" : quantity , "start_price" : current_price})
-                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
                   elif current_signal == "":
                      Utilities.place_order(tradingApp,current_contract,Utilities.market_order("BUY",abs(positions_data_symbol["amount"])))
                      print(f"SYMBOL : {current_symbol} || CURRENT ACTION : BUY || SIGNAL : {current_signal} || PRICE : {current_price} || QUANTITY : {positions_data_symbol["amount"]}")
                      returns[current_symbol].append(Utilities.calculate_profit_percentage(positions_data_symbol["start_price"], current_price, positions_data_symbol["position"]))
                      positions_data_symbol.update({"position" : "" , "amount" : 0 , "start_price" : None})
-                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"emaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
+                     excel.write_line_strategy1(formatted_time,current_price,"BUY",current_signal,data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"Zscore"],data_df_dict[current_symbol].loc[data_df_dict[current_symbol].index[-1],"smaZ"],sum(returns[current_symbol]),Utilities.calculate_compound_returns(returns[current_symbol]))
             
             #print current p&l
             if positions_data_symbol["position"] != "":
                print(F"THE  CURRENT P&L FOR TICKER : {current_symbol} IS -> {Utilities.calculate_profit_percentage(positions_data_symbol["start_price"],current_price,positions_data_symbol["position"])} %")
 
-            #Sleep for 1 min
-            time.sleep(19)
+         #Sleep for 1 min
+         time.sleep(60-((time.time()-loop_start_time)%60))

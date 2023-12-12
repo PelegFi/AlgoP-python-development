@@ -1,8 +1,8 @@
 #############################strategy 1 variables ###################################
 def strategy1(Zscore,emaZ)-> str:
-    if Zscore>0 and Zscore>emaZ:
+    if Zscore>1 and Zscore>emaZ:
         return "BUY"
-    elif Zscore<0 and Zscore<emaZ:
+    elif Zscore<-1 and Zscore<emaZ:
         return "SELL"
     else:
         return ""
@@ -13,19 +13,19 @@ backtest_vars={
                "end_date":""}
 
 contracts = [{"symbol":"TQQQ","secType":"STK","currency":"USD","exchange":"SMART"},
-           {"symbol":"SSO","secType":"STK","currency":"USD","exchange":"SMART"}
-           ]
+             {"symbol":"SSO","secType":"STK","currency":"USD","exchange":"SMART"}]
+           
 
 risk_vars={"precentage_from_capital":5,
            "maximum_risk_precentage":10}
 
 strategy_vars={"ZscoreWindow":75,
-               "emaZwindow":75,
+               "smaZwindow":75,
                "candlesTimeFrame":"15 mins"}
 
 other_vars={"excle_path_backtest":"/Users/pelegfishman/prog_temp/AlgoP-python/excels/backtets/",
-            "live_excel_path" : "C:\\Users\\Administrator\\Desktop\\AlgoP-python\\AlgoP-python\\excels\\live",
-            "load_from_existing_excel":False}
+            "live_excel_path" : "excels/live/current_AlgoP_live_excel.xlsx",
+            "load_from_existing_excel":True}
 
 #############################strategy 2 variables ###################################
 
