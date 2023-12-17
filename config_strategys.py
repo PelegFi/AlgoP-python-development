@@ -23,7 +23,7 @@ strategy_vars={"ZscoreWindow":75,
                "smaZwindow":75,
                "candlesTimeFrame":"15 mins"}
 
-other_vars={"excle_path_backtest":"/Users/pelegfishman/prog_temp/AlgoP-python/excels/backtets/",
+other_vars={"excle_path_backtest":"/Users/pelegfishman/prog_temp/AlgoP-python/excels/backtets",
             "live_excel_path" : "excels/live/current_AlgoP_live_excel.xlsx",
             "load_from_existing_excel":True}
 

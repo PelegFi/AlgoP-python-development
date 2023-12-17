@@ -81,7 +81,7 @@ class TradingApp(EWrapper, EClient):
         super().position(account, contract, position, avgCost)
 
         if account not in self.positions_data:
-            self.positions_data[account] = pd.DataFrame(columns=["contract","position","amount","start_price","real_returns_precentages"]).set_index("contract")
+            self.positions_data[account] = pd.DataFrame(columns=["contract","position","amount","start_price"]).set_index("contract")
         if position >0:
             self.positions_data[account] = self.positions_data[account]._append(pd.DataFrame({"position":"BUY","amount":position,"start_price":avgCost},index=[contract.symbol]))
         elif position <0 :

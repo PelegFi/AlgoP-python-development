@@ -17,7 +17,7 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
    account_name=strategy_vars["accounts_list"][0]
    positions_data= openPositions[account_name].to_dict(orient='index') if openPositions is not None else {} #-> dict {ticker :{position : "BUY/SELL/""" ,amount : int ,start_price : float}}
    excel = Excels(other_vars["live_excel_path"],other_vars["load_from_existing_excel"],contracts)
-   returns = {} #-> {ticker : []}
+   returns = {} # -> {ticker : []}
 
    #requesting historical data for first calc + get socket connections
    tradingApp.reqHistData(contracts,"",Utilities.calc_backtest_min_time(),strategy_parameters["candlesTimeFrame"])
@@ -38,7 +38,7 @@ def strategy_1 (tradingApp:TradingApp,strategy_vars:dict,openPositions:dict,acco
          last_cell_value = excel.wb[str(contract["symbol"])].cell(row=excel.wb[str(contract["symbol"])].max_row , column=8).value
          returns[contract["symbol"]] = [last_cell_value] if last_cell_value != 0 else []
    
-   print("jhzdgfjsdgfvyusdhbfh!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> ",returns)
+   print("PREVIOUS COMPOUND RETURNS !!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> ",returns)
 
    time.sleep(10)
    counter_delete = 1
