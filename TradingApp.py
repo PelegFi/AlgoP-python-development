@@ -167,7 +167,7 @@ if __name__ == "__main__":
     time.sleep(5)
     #choose strategy
     current_strategy_name="strategy 1"
-    backtets_mode=False
+    backtets_mode=True
     #strat Algop
     AlgoP.play(current_strategy_name,backtets_mode)
  
